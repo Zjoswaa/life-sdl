@@ -39,13 +39,15 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 
 # Try to run without console in release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    if (WIN32)
-        if (MSVC)
+    if(WIN32)
+        if(MSVC)
             target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
         elseif(MINGW)
             target_link_options(${PROJECT_NAME} PRIVATE "-mwindows")
         endif()
     else()
-        target_link_options(${PROJECT_NAME} PRIVATE "-mwindows")
+        if(MINGW)
+            target_link_options(${PROJECT_NAME} PRIVATE "-mwindows")
+        endif()
     endif()
 endif()
