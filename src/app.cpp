@@ -4,6 +4,14 @@
 App::App() {
     window = nullptr;
     renderer = nullptr;
+
+    backgroundColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+
+    running = true;
+    paused = false;
+    mouseX = 0;
+    mouseY = 0;
 }
 
 App::~App() {
@@ -24,7 +32,7 @@ int App::init() {
     LOG("Intialized SDL")
 
     // Create window
-    window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     if (window == nullptr) {
         ERROR("Failed to create window: " << SDL_GetError())
         return 2;
@@ -50,32 +58,58 @@ int App::run() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
-    // Setup ImGui theme
+    // Set ImGui theme
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
+    // ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
 
     // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    // bool show_demo_window = true;
+    // bool show_another_window = false;
 
-    bool running = true;
     while (running) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            ImGui_ImplSDL3_ProcessEvent(&event);
-            if (event.type == SDL_EVENT_QUIT)
-                running = false;
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
-                running = false;
+        while (SDL_PollEvent(&e)) {
+            ImGui_ImplSDL3_ProcessEvent(&e);
+            switch (e.type) {
+                // Quit program
+                case SDL_EVENT_QUIT:
+                    running = false;
+                case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                    if (e.window.windowID == SDL_GetWindowID(window)) {
+                        running = false;
+                    }
+
+                // Keyboard press
+                case SDL_EVENT_KEY_DOWN:
+                    switch (e.key.keysym.sym) {
+                        case SDLK_ESCAPE:
+                            paused = !paused;
+                            LOG("Escape Pressed: " << paused)
+                        break;
+                        default:
+                            break;
+                    }
+
+                // Mouse press
+                case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                    switch (e.button.button) {
+                        case SDL_BUTTON_LEFT:
+                            SDL_GetMouseState(&mouseX, &mouseY);
+                            std::cout << "Left mouse pressed: " << mouseX << " " << mouseY << std::endl;
+                        break;
+                        default:
+                            break;
+                    }
+
+                default:
+                    break;
+            }
         }
 
         // Start the Dear ImGui frame
@@ -83,48 +117,18 @@ int App::run() {
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window) {
-            ImGui::ShowDemoWindow(&show_demo_window);
-        }
+        // Create ImGui Windows
+        ImGui::SetNextWindowSize(ImVec2(100, 200));
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::Begin("Settings", nullptr, windowFlags);
+        ImGui::Checkbox("Pause", &paused);
+        ImGui::End();
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", reinterpret_cast<float*>(&clear_color)); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button")) { // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            }
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-            ImGui::End();
-        }
-
-        // 3. Show another simple window.
-        if (show_another_window) {
-            ImGui::Begin("Another Window", &show_another_window); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
+        // ImGui::ShowDemoWindow();
 
         // Rendering
         ImGui::Render();
-        //SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-        SDL_SetRenderDrawColor(renderer, static_cast<unsigned char>(clear_color.x * 255), static_cast<unsigned char>(clear_color.y * 255), static_cast<unsigned char>(clear_color.z * 255), static_cast<unsigned char>(clear_color.w * 255));
+        SDL_SetRenderDrawColor(renderer, static_cast<unsigned char>(backgroundColor.x * 255), static_cast<unsigned char>(backgroundColor.y * 255), static_cast<unsigned char>(backgroundColor.z * 255), static_cast<unsigned char>(backgroundColor.w * 255));
         SDL_RenderClear(renderer);
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(renderer);

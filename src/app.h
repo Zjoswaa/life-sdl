@@ -25,6 +25,15 @@ public:
 private:
     SDL_Window* window;
     SDL_Renderer* renderer;
+    SDL_Event e{};
+
+    ImVec4 backgroundColor;
+    ImGuiWindowFlags windowFlags;
+
+    bool running;
+    bool paused;
+    float mouseX;
+    float mouseY;
 };
 
 #endif
