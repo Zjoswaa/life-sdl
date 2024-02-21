@@ -69,9 +69,14 @@ int App::run() {
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
 
-    // Our state
-    // bool show_demo_window = true;
-    // bool show_another_window = false;
+    constexpr SDL_FRect source{0, 0, (WINDOW_WIDTH - 100) / TEXTURE_ZOOM, WINDOW_HEIGHT / TEXTURE_ZOOM};
+    constexpr SDL_FRect dest{0, 0, WINDOW_WIDTH - 100, WINDOW_HEIGHT};
+    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, (WINDOW_WIDTH - 100) / TEXTURE_ZOOM, WINDOW_HEIGHT / TEXTURE_ZOOM);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+    std::vector<SDL_Point> pv;
+    for (int i = 0; i < 20; i++) {
+        pv.emplace_back(rand() % (WINDOW_WIDTH - 100) / TEXTURE_ZOOM, rand() % WINDOW_HEIGHT / TEXTURE_ZOOM);
+    }
 
     while (running) {
         while (SDL_PollEvent(&e)) {
@@ -91,7 +96,6 @@ int App::run() {
                         case SDLK_ESCAPE:
                             paused = !paused;
                             LOG("Escape Pressed: " << paused)
-                        break;
                         default:
                             break;
                     }
@@ -119,7 +123,7 @@ int App::run() {
 
         // Create ImGui Windows
         ImGui::SetNextWindowSize(ImVec2(100, 200));
-        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH - 100, 0));
         ImGui::Begin("Settings", nullptr, windowFlags);
         ImGui::Checkbox("Pause", &paused);
         ImGui::End();
@@ -128,10 +132,29 @@ int App::run() {
 
         // Rendering
         ImGui::Render();
-        SDL_SetRenderDrawColor(renderer, static_cast<unsigned char>(backgroundColor.x * 255), static_cast<unsigned char>(backgroundColor.y * 255), static_cast<unsigned char>(backgroundColor.z * 255), static_cast<unsigned char>(backgroundColor.w * 255));
+        SDL_SetRenderTarget(renderer, texture);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
+        if (!paused) {
+            for (SDL_Point& point: pv) {
+                point.x += rand() % 3 - 1;
+                point.y += rand() % 3 - 1;
+            }
+        }
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        for (SDL_Point& point: pv) {
+            SDL_RenderPoint(renderer, point.x, point.y);
+        }
+        SDL_SetRenderTarget(renderer, nullptr);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+        SDL_RenderTexture(renderer, texture, &source, &dest);
+        // SDL_SetRenderDrawColor(renderer, static_cast<unsigned char>(backgroundColor.x * 255), static_cast<unsigned char>(backgroundColor.y * 255), static_cast<unsigned char>(backgroundColor.z * 255), static_cast<unsigned char>(backgroundColor.w * 255));
+        // SDL_RenderClear(renderer);
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(renderer);
+
+        SDL_Delay(50);
     }
 
     return 0;
