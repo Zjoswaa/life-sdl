@@ -42,6 +42,9 @@ private:
     bool paused;
     float mouseX;
     float mouseY;
+
+    void clearGrid();
+    void addRandomCells();
 };
 
 #endif

@@ -57,6 +57,7 @@ int App::init() {
         return 3;
     }
     LOG("Created renderer")
+    LOG("")
 
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SDL_ShowWindow(window);
@@ -106,8 +107,10 @@ int App::run() {
                     switch (e.button.button) {
                         case SDL_BUTTON_LEFT:
                             SDL_GetMouseState(&mouseX, &mouseY);
-                            std::cout << "Left mouse pressed: " << mouseX << "(" << static_cast<int>(mouseX / CELL_WIDTH) << ") " << mouseY << "(" << static_cast<int>(mouseY / CELL_HEIGHT) << ")" << std::endl;
-                            grid[static_cast<int>(mouseX / CELL_WIDTH)][static_cast<int>(mouseY / CELL_HEIGHT)].flip();
+                            if (mouseX < GRID_WIDTH && mouseY < GRID_HEIGHT && mouseX >= 0 && mouseY >= 0) {
+                                LOG(mouseX << "(" << static_cast<int>(mouseX / CELL_WIDTH) << ") " << mouseY << "(" << static_cast<int>(mouseY / CELL_HEIGHT) << ")")
+                                grid[static_cast<int>(mouseX / CELL_WIDTH)][static_cast<int>(mouseY / CELL_HEIGHT)].flip();
+                            }
                             break;
                         default:
                             break;
@@ -130,6 +133,12 @@ int App::run() {
         ImGui::Checkbox("Pause (Esc)", &paused);
         ImGui::ColorEdit3("Alive", reinterpret_cast<float *>(&aliveCellColor));
         ImGui::ColorEdit3("Dead", reinterpret_cast<float *>(&deadCellColor));
+        if (ImGui::Button("Clear")) {
+            clearGrid();
+        }
+        if (ImGui::Button("Random")) {
+            addRandomCells();
+        }
         // ImGui::ColorEdit3("Background", reinterpret_cast<float*>(&backgroundColor));
         ImGui::End();
 
@@ -154,4 +163,22 @@ int App::run() {
     }
 
     return 0;
+}
+
+void App::clearGrid() {
+    for (int i = 0; i < GRID_WIDTH / CELL_WIDTH; i++) {
+        for (int j = 0; j < GRID_HEIGHT/ CELL_HEIGHT; j++) {
+            grid[i][j].isAlive = false;
+        }
+    }
+}
+
+void App::addRandomCells() {
+    for (int i = 0; i < GRID_WIDTH / CELL_WIDTH; i++) {
+        for (int j = 0; j < GRID_HEIGHT/ CELL_HEIGHT; j++) {
+            if (!grid[i][j].isAlive && rand() % 2) {
+                grid[i][j].isAlive = true;
+            }
+        }
+    }
 }
