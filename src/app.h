@@ -8,6 +8,9 @@
 #include <imgui_impl_sdlrenderer3.h>
 #include <vector>
 
+#include "cell.h"
+#include "constants.h"
+
 #ifdef DEBUG
 #define LOG(x) std::cout << x << std::endl;
 #define ERROR(x) std::cerr << x << std::endl;
@@ -27,6 +30,10 @@ private:
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Event e{};
+    ImVec4 aliveCellColor;
+    ImVec4 deadCellColor;
+    std::vector<std::vector<Cell>> grid;
+
 
     ImVec4 backgroundColor;
     ImGuiWindowFlags windowFlags;

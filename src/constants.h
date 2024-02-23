@@ -1,9 +1,14 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define WINDOW_WIDTH 820
-#define WINDOW_HEIGHT 720
 #define WINDOW_TITLE "Game of Life"
-#define TEXTURE_ZOOM 12
+#define WINDOW_WIDTH 920
+#define WINDOW_HEIGHT 720
+#define SETTINGS_WIDTH 200
+#define SETTINGS_HEIGHT 720
+#define GRID_WIDTH 720
+#define GRID_HEIGHT 720
+#define CELL_WIDTH 10
+#define CELL_HEIGHT 10
 
 #endif

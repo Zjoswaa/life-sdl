@@ -1,15 +1,26 @@
 #include "app.h"
-#include "constants.h"
 
 App::App() {
     window = nullptr;
     renderer = nullptr;
+    aliveCellColor = {0.f, 0.f, 0.f, 1.f};
+    deadCellColor = {1.f, 1.f, 1.f, 1.f};
+    for (int i = 0; i < GRID_WIDTH / CELL_WIDTH; i++) {
+        std::vector<Cell> column;
+        for (int j = 0; j < GRID_HEIGHT/ CELL_HEIGHT; j++) {
+            column.emplace_back(static_cast<float>(i) * CELL_WIDTH, static_cast<float>(j) * CELL_HEIGHT);
+        }
+        grid.emplace_back(column);
+    }
+    LOG("Initialized grid")
+    LOG("Grid width: " << grid.size())
+    LOG("Grid height: " << grid[0].size())
 
     backgroundColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
 
     running = true;
-    paused = false;
+    paused = true;
     mouseX = 0;
     mouseY = 0;
 }
@@ -63,20 +74,10 @@ int App::run() {
 
     // Set ImGui theme
     ImGui::StyleColorsDark();
-    // ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
-
-    constexpr SDL_FRect source{0, 0, (WINDOW_WIDTH - 100) / TEXTURE_ZOOM, WINDOW_HEIGHT / TEXTURE_ZOOM};
-    constexpr SDL_FRect dest{0, 0, WINDOW_WIDTH - 100, WINDOW_HEIGHT};
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, (WINDOW_WIDTH - 100) / TEXTURE_ZOOM, WINDOW_HEIGHT / TEXTURE_ZOOM);
-    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
-    std::vector<SDL_Point> pv;
-    for (int i = 0; i < 20; i++) {
-        pv.emplace_back(rand() % (WINDOW_WIDTH - 100) / TEXTURE_ZOOM, rand() % WINDOW_HEIGHT / TEXTURE_ZOOM);
-    }
 
     while (running) {
         while (SDL_PollEvent(&e)) {
@@ -105,8 +106,9 @@ int App::run() {
                     switch (e.button.button) {
                         case SDL_BUTTON_LEFT:
                             SDL_GetMouseState(&mouseX, &mouseY);
-                            std::cout << "Left mouse pressed: " << mouseX << " " << mouseY << std::endl;
-                        break;
+                            std::cout << "Left mouse pressed: " << mouseX << "(" << static_cast<int>(mouseX / CELL_WIDTH) << ") " << mouseY << "(" << static_cast<int>(mouseY / CELL_HEIGHT) << ")" << std::endl;
+                            grid[static_cast<int>(mouseX / CELL_WIDTH)][static_cast<int>(mouseY / CELL_HEIGHT)].flip();
+                            break;
                         default:
                             break;
                     }
@@ -122,39 +124,33 @@ int App::run() {
         ImGui::NewFrame();
 
         // Create ImGui Windows
-        ImGui::SetNextWindowSize(ImVec2(100, 200));
-        ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH - 100, 0));
+        ImGui::SetNextWindowSize(ImVec2(SETTINGS_WIDTH, SETTINGS_HEIGHT));
+        ImGui::SetNextWindowPos(ImVec2(GRID_WIDTH, 0));
         ImGui::Begin("Settings", nullptr, windowFlags);
-        ImGui::Checkbox("Pause", &paused);
+        ImGui::Checkbox("Pause (Esc)", &paused);
+        ImGui::ColorEdit3("Alive", reinterpret_cast<float *>(&aliveCellColor));
+        ImGui::ColorEdit3("Dead", reinterpret_cast<float *>(&deadCellColor));
+        // ImGui::ColorEdit3("Background", reinterpret_cast<float*>(&backgroundColor));
         ImGui::End();
 
         // ImGui::ShowDemoWindow();
 
         // Rendering
         ImGui::Render();
-        SDL_SetRenderTarget(renderer, texture);
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_SetRenderDrawColor(renderer, static_cast<unsigned char>(backgroundColor.x * 255), static_cast<unsigned char>(backgroundColor.y * 255), static_cast<unsigned char>(backgroundColor.z * 255), static_cast<unsigned char>(backgroundColor.w * 255));
         SDL_RenderClear(renderer);
-        if (!paused) {
-            for (SDL_Point& point: pv) {
-                point.x += rand() % 3 - 1;
-                point.y += rand() % 3 - 1;
+        for (int i = 0; i < GRID_WIDTH / CELL_WIDTH; i++) {
+            for (int j = 0; j < GRID_HEIGHT/ CELL_HEIGHT; j++) {
+                if (grid[i][j].isAlive) {
+                    SDL_SetRenderDrawColor(renderer, static_cast<Uint8>(aliveCellColor.x * 255), static_cast<Uint8>(aliveCellColor.y * 255), static_cast<Uint8>(aliveCellColor.z * 255), static_cast<Uint8>(aliveCellColor.w * 255));
+                } else {
+                    SDL_SetRenderDrawColor(renderer, static_cast<Uint8>(deadCellColor.x * 255), static_cast<Uint8>(deadCellColor.y * 255), static_cast<Uint8>(deadCellColor.z * 255), static_cast<Uint8>(deadCellColor.w * 255));
+                }
+                SDL_RenderFillRect(renderer, &grid[i][j].rect);
             }
         }
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        for (SDL_Point& point: pv) {
-            SDL_RenderPoint(renderer, point.x, point.y);
-        }
-        SDL_SetRenderTarget(renderer, nullptr);
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
-        SDL_RenderTexture(renderer, texture, &source, &dest);
-        // SDL_SetRenderDrawColor(renderer, static_cast<unsigned char>(backgroundColor.x * 255), static_cast<unsigned char>(backgroundColor.y * 255), static_cast<unsigned char>(backgroundColor.z * 255), static_cast<unsigned char>(backgroundColor.w * 255));
-        // SDL_RenderClear(renderer);
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(renderer);
-
-        SDL_Delay(50);
     }
 
     return 0;
