@@ -31,11 +31,19 @@ target_link_libraries(${PROJECT_NAME} SDL3::SDL3)
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
 # Copy SDL3.dll to binary directory
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        ${PROJECT_BINARY_DIR}/vendor/SDL/SDL3.dll
-        ${PROJECT_BINARY_DIR}
-)
+if(MSVC)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${PROJECT_BINARY_DIR}/vendor/SDL/SDL3.dll
+            ${PROJECT_BINARY_DIR}
+    )
+else()
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${PROJECT_BINARY_DIR}/vendor/SDL/Release/SDL3.dll
+            ${PROJECT_BINARY_DIR}/Release
+    )
+endif()
 
 # Try to run without console in release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
