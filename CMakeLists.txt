@@ -26,20 +26,7 @@ source_group("headers" FILES ${PROJECT_HEADERS})
 source_group("sources" FILES ${PROJECT_SOURCES})
 
 # Set executable and target link libraries
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    if(WIN32)
-        if(MSVC)
-            add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${PROJECT_HEADERS} ${PROJECT_CONFIGS} ${VENDOR_SOURCES} resources.rc)
-        else()
-            add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} ${PROJECT_CONFIGS} ${VENDOR_SOURCES} resources.rc)
-        endif()
-    else()
-        add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} ${PROJECT_CONFIGS} ${VENDOR_SOURCES} resources.rc)
-    endif()
-else()
-    add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} ${PROJECT_CONFIGS} ${VENDOR_SOURCES} resources.rc)
-endif()
-
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} ${PROJECT_CONFIGS} ${VENDOR_SOURCES} resources.rc)
 target_link_libraries(${PROJECT_NAME} SDL3::SDL3)
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
@@ -53,9 +40,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 # Try to run without console in release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     if(WIN32)
-        if(MSVC)
-            #target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS/ENTRY:mainCRTStartup")
-        elseif(MINGW)
+        if(MINGW)
             target_link_options(${PROJECT_NAME} PRIVATE "-mwindows")
         endif()
     else()
