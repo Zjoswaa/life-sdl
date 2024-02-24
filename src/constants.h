@@ -10,5 +10,7 @@
 #define GRID_HEIGHT 720
 #define CELL_WIDTH 10
 #define CELL_HEIGHT 10
+#define MIN_DELAY 5
+#define MAX_DELAY 100
 
 #endif

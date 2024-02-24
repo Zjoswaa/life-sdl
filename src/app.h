@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
+#include <chrono>
 #include <vector>
 
 #include "cell.h"
@@ -42,9 +43,15 @@ private:
     bool paused;
     float mouseX;
     float mouseY;
+    int delay;
+    bool ctrlDown;
 
     void clearGrid();
     void addRandomCells();
+
+    void evaluateNextGen();
+    short aliveNeigbourCount(int x, int y) const;
+    void nextGeneration();
 };
 
 #endif

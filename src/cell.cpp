@@ -21,3 +21,7 @@ Cell::Cell(float x, float y, bool isAlive) {
 void Cell::flip() {
     isAlive = !isAlive;
 }
+
+void Cell::updateAliveStatus() {
+    isAlive = isAliveNext;
+}

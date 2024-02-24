@@ -15,6 +15,7 @@ public:
     Cell(float x, float y, bool isAlive);
 
     void flip();
+    void updateAliveStatus();
 private:
 
 };
