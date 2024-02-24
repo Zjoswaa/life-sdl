@@ -41,7 +41,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     if(WIN32)
         if(MSVC)
-            target_link_options(${PROJECT_NAME} PRIVATE "/subsystem:windows,/entry:mainCRTStartup")
+            target_link_options(${PROJECT_NAME} PRIVATE "//SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
         elseif(MINGW)
             target_link_options(${PROJECT_NAME} PRIVATE "-mwindows")
         endif()
