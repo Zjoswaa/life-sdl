@@ -184,6 +184,10 @@ int App::run() {
         ImGui::SliderInt("Delay", &delay, MIN_DELAY, MAX_DELAY);
         ImGui::Text("Up/Down: +1/-1");
         ImGui::Text("Ctrl Up/Down: +5/-5");
+        ImGui::Text("");
+        if (ImGui::Button("Glider Gun")) {
+            gliderGun(1, 5);
+        }
         // ImGui::ColorEdit3("Background", reinterpret_cast<float*>(&backgroundColor));
 
         ImGui::End();
@@ -311,4 +315,45 @@ void App::nextGeneration() {
         }
     }
     SDL_RenderPresent(renderer);
+}
+
+void App::gliderGun(const int x, const int y) {
+    clearGrid();
+
+    grid[x][y].isAlive = true;
+    grid[x][y + 1].isAlive = true;
+    grid[x + 1][y].isAlive = true;
+    grid[x + 1][y + 1].isAlive = true;
+    grid[x + 10][y].isAlive = true;
+    grid[x + 10][y + 1].isAlive = true;
+    grid[x + 10][y + 2].isAlive = true;
+    grid[x + 11][y - 1].isAlive = true;
+    grid[x + 11][y + 3].isAlive = true;
+    grid[x + 12][y - 2].isAlive = true;
+    grid[x + 12][y + 4].isAlive = true;
+    grid[x + 13][y - 2].isAlive = true;
+    grid[x + 13][y + 4].isAlive = true;
+    grid[x + 14][y + 1].isAlive = true;
+    grid[x + 15][y - 1].isAlive = true;
+    grid[x + 15][y + 3].isAlive = true;
+    grid[x + 16][y].isAlive = true;
+    grid[x + 16][y + 1].isAlive = true;
+    grid[x + 16][y + 2].isAlive = true;
+    grid[x + 17][y + 1].isAlive = true;
+    grid[x + 20][y].isAlive = true;
+    grid[x + 20][y - 1].isAlive = true;
+    grid[x + 20][y - 2].isAlive = true;
+    grid[x + 21][y].isAlive = true;
+    grid[x + 21][y - 1].isAlive = true;
+    grid[x + 21][y - 2].isAlive = true;
+    grid[x + 22][y - 3].isAlive = true;
+    grid[x + 22][y + 1].isAlive = true;
+    grid[x + 24][y - 4].isAlive = true;
+    grid[x + 24][y - 3].isAlive = true;
+    grid[x + 24][y + 1].isAlive = true;
+    grid[x + 24][y + 2].isAlive = true;
+    grid[x + 34][y - 2].isAlive = true;
+    grid[x + 34][y - 1].isAlive = true;
+    grid[x + 35][y - 2].isAlive = true;
+    grid[x + 35][y - 1].isAlive = true;
 }

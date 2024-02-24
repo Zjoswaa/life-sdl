@@ -52,6 +52,7 @@ private:
     void evaluateNextGen();
     short aliveNeigbourCount(int x, int y) const;
     void nextGeneration();
+    void gliderGun(int x, int y);
 };
 
 #endif
