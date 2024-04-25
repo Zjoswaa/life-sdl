@@ -34,14 +34,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJ
 if(WIN32)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
-            ${PROJECT_BINARY_DIR}/vendor/SDL/Release/SDL3.dll
-            ${PROJECT_BINARY_DIR}/Release
+            ${PROJECT_BINARY_DIR}/vendor/SDL/SDL3.dll
+            ${PROJECT_BINARY_DIR}
+            COMMENT "Copying SDL library to output directory"
     )
 elseif(UNIX AND NOT APPLE) # Linux
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
             ${PROJECT_BINARY_DIR}/vendor/SDL/libSDL3.so
             ${PROJECT_BINARY_DIR}
+            COMMENT "Copying SDL library to output directory"
     )
 endif()
 
