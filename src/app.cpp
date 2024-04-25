@@ -183,8 +183,7 @@ int App::run() {
         }
         ImGui::SliderInt("Delay", &delay, MIN_DELAY, MAX_DELAY);
         ImGui::Text("Up/Down: +1/-1");
-        ImGui::Text("Ctrl Up/Down: +5/-5");
-        ImGui::Text("");
+        ImGui::Text("Ctrl Up/Down: +5/-5\n");
         if (ImGui::Button("Glider Gun")) {
             gliderGun(1, 5);
         }

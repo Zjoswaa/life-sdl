@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.22)
 project(Life-SDL)
 set(CMAKE_CXX_STANDARD 23)
 
@@ -30,17 +30,17 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} ${PROJECT_C
 target_link_libraries(${PROJECT_NAME} SDL3::SDL3)
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
-# Copy SDL3.dll to binary directory
-if(MSVC)
+# Copy SDL3 library to binary directory
+if(WIN32)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
             ${PROJECT_BINARY_DIR}/vendor/SDL/Release/SDL3.dll
             ${PROJECT_BINARY_DIR}/Release
     )
-else()
+elseif(UNIX AND NOT APPLE) # Linux
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
-            ${PROJECT_BINARY_DIR}/vendor/SDL/SDL3.dll
+            ${PROJECT_BINARY_DIR}/vendor/SDL/libSDL3.so
             ${PROJECT_BINARY_DIR}
     )
 endif()
